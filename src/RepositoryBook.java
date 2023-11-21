@@ -24,10 +24,6 @@ public class RepositoryBook {
         initializeDummyData();
     }
 
-    // public void displayComicByMangakaRating() {
-    //     CommercialBook.displayComicByMangakaRating(allBooks);
-    // }
-
     // Method untuk mendapatkan semua buku
     public List<CommercialBook> getAllBook() {
         return allBooks;
@@ -63,18 +59,162 @@ public class RepositoryBook {
         return cheapestBooks;
     }
 
-    // Metode untuk mengelompokkan buku berdasarkan penulis dan negara
     public Map<String, Map<String, List<CommercialBook>>> groupBooksByAuthorAndCountry() {
-        return allBooks.stream()
-                .collect(Collectors.groupingBy(
-                        CommercialBook::getAuthorName,
-                        Collectors.groupingBy(
-                                CommercialBook::getAuthorCountry,
-                                Collectors.toList()
-                        )
-                ));
+        Map<String, Map<String, List<CommercialBook>>> groupedBooks = new HashMap<>();
+
+        for (CommercialBook book : allBooks) {
+            String authorName = getAuthorName(book);
+            String country = getCountry(book);
+
+            // Check if authorName and country are not null
+            if (authorName != null && country != null) {
+                groupedBooks
+                    .computeIfAbsent(authorName, k -> new HashMap<>())
+                    .computeIfAbsent(country, k -> new ArrayList<>())
+                    .add(book);
+            }
+        }
+
+        return groupedBooks;
     }
 
+    // Metode untuk mendapatkan nama penulis (author)
+    private String getAuthorName(CommercialBook book) {
+        if (book instanceof Author) {
+            return ((Author) book).getFullName();
+        } else if (book instanceof Novelis) {
+            return ((Novelis) book).getFullName();
+        } else if (book instanceof Mangaka) {
+            return ((Mangaka) book).getFullName();
+        } else {
+            return null;
+        }
+    }
+
+    // Metode untuk mendapatkan negara (country)
+    private String getCountry(CommercialBook book) {
+        if (book instanceof Author) {
+            return ((Author) book).getCountry();
+        } else if (book instanceof Novelis) {
+            return ((Novelis) book).getCountry();
+        } else if (book instanceof Mangaka) {
+            return ((Mangaka) book).getCountry();
+        } else {
+            return null;
+        }
+    }
+
+    // Metode untuk menampilkan data Comic berdasarkan rating mangaka
+    public void displayComicByMangakaRating() {
+        Comic.displayByMangakaRating(allBooks);
+    }
+
+    // Metode untuk mendapatkan publisher dengan product cost termurah
+    public Publisher getCheapestPublisher() {
+        Optional<Publisher> cheapestPublisher = allBooks.stream()
+                .min(Comparator.comparingDouble(book -> book.getPrice())) // Assuming getPrice() is the correct method
+                .map(CommercialBook::getPublisher);
+        return cheapestPublisher.orElse(null);
+    }
+
+    // Metode untuk mendapatkan publisher dengan product cost termahal
+    public Publisher getMostExpensivePublisher() {
+        Optional<Publisher> mostExpensivePublisher = allBooks.stream()
+                .max(Comparator.comparingDouble(book -> book.getPrice())) // Assuming getPrice() is the correct method
+                .map(CommercialBook::getPublisher);
+        return mostExpensivePublisher.orElse(null);
+    }
+
+    // Metode untuk mengelompokkan author, novelis, dan mangaka berdasarkan negara
+    public static Map<String, List<String>> groupPeopleByCountry(List<CommercialBook> books) {
+        Map<String, List<String>> groupedPeople = new HashMap<>();
+    
+        for (CommercialBook book : books) {
+            if (book instanceof Author || book instanceof Novelis || book instanceof Mangaka) {
+                String key = "";
+                if (book instanceof Author) {
+                    key = ((Author) book).getCountry();
+                } else if (book instanceof Novelis) {
+                    key = ((Novelis) book).getCountry();
+                } else if (book instanceof Mangaka) {
+                    key = ((Mangaka) book).getCountry();
+                }
+    
+                groupedPeople.computeIfAbsent(key, k -> new ArrayList<>()).add(book.getFullName());
+            }
+        }
+    
+        return groupedPeople;
+    }
+
+     // Metode untuk menampilkan data penulis (author, novelis, mangaka) berdasarkan rentang umur
+    public static void displayPeopleByAgeRange(List<CommercialBook> books) {
+        Map<String, List<String>> peopleByAgeRange = groupPeopleByAgeRange(books);
+
+        // Menampilkan hasil
+        peopleByAgeRange.forEach((range, people) -> {
+            System.out.println(range);
+            people.forEach(person -> System.out.println("- " + person));
+            System.out.println(); // Baris kosong antar kelompok
+        });
+    }
+
+    // Metode untuk mengelompokkan penulis (author, novelis, mangaka) berdasarkan rentang umur
+    private static Map<String, List<String>> groupPeopleByAgeRange(List<CommercialBook> books) {
+        Map<String, List<String>> peopleByAgeRange = new HashMap<>();
+
+        for (CommercialBook book : books) {
+            if (book instanceof Author || book instanceof Novelis || book instanceof Mangaka) {
+                String personName = getPersonName(book);
+                int age = getPersonAge(book);
+
+                String ageRange = getAgeRange(age);
+
+                peopleByAgeRange.computeIfAbsent(ageRange, k -> new ArrayList<>()).add(personName);
+            }
+        }
+
+        return peopleByAgeRange;
+    }
+
+    // Metode untuk mendapatkan nama penulis (author, novelis, mangaka)
+    private static String getPersonName(CommercialBook book) {
+        if (book instanceof Author) {
+            return ((Author) book).getFullName();
+        } else if (book instanceof Novelis) {
+            return ((Novelis) book).getFullName();
+        } else if (book instanceof Mangaka) {
+            return ((Mangaka) book).getFullName();
+        } else {
+            return ""; // Ubah sesuai kebutuhan
+        }
+    }
+
+    // Metode untuk mendapatkan usia penulis (author, novelis, mangaka)
+    private static int getPersonAge(CommercialBook book) {
+        if (book instanceof Author) {
+            return ((Author) book).getAge();
+        } else if (book instanceof Novelis) {
+            return ((Novelis) book).getAge();
+        } else if (book instanceof Mangaka) {
+            return ((Mangaka) book).getAge();
+        } else {
+            return 0; // Ubah sesuai kebutuhan
+        }
+    }
+
+    // Metode untuk mendapatkan rentang umur berdasarkan usia
+    private static String getAgeRange(int age) {
+        if (age >= 27 && age <= 30) {
+            return "27-30";
+        } else if (age >= 31 && age <= 40) {
+            return "31-40";
+        } else if (age >= 41 && age <= 50) {
+            return "41-50";
+        } else {
+            return "50-60";
+        }
+    }
 
     // Inisialisasi data dummy
     private void initializeDummyData() {
@@ -166,5 +306,21 @@ public class RepositoryBook {
         allBooks.add(comic6);
         allBooks.add(comic7);
         allBooks.add(comic8);
+        allBooks.add(author1);
+        allBooks.add(author2);
+        allBooks.add(author3);
+        allBooks.add(author4);
+        allBooks.add(author5);
+        allBooks.add(author6);
+        allBooks.add(novelis1);
+        allBooks.add(novelis2);
+        allBooks.add(novelis3);
+        allBooks.add(novelis4);
+        allBooks.add(novelis5);
+        allBooks.add(mangaka1);
+        allBooks.add(mangaka2);
+        allBooks.add(mangaka3);
+        allBooks.add(mangaka4);
+        allBooks.add(mangaka5);
     }
 }

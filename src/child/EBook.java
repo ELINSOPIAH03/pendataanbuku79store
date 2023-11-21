@@ -75,7 +75,7 @@ public class EBook extends CommercialBook{
     }
     
     @Override
-    public String getAuthorName() {
+    public String getFullName() {
         return author.getFullName();
     }
 
@@ -84,5 +84,5 @@ public class EBook extends CommercialBook{
         return author.getCountry();
     }
 
-    
+
 }

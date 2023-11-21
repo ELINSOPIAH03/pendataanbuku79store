@@ -1,12 +1,17 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
+import child.Author;
 import child.Comic;
 import child.Mangaka;
 import child.EBook;
 import child.Novel;
+import child.Novelis;
+import child.Publisher;
 import parent.CommercialBook;
 
 
@@ -51,22 +56,23 @@ public class Main {
                     break;
                 case 4:
                     // TODO: Implement searching for comics based on Mangaka rating
+                    repositoryBook.displayComicByMangakaRating();
                     break;
                 case 5:
                     // TODO: Implement searching for books based on Publisher country
                     // Grup buku berdasarkan publisherName dan country
-                    Map<String, List<CommercialBook>> groupedBooks = CommercialBook.groupBooksByPublisherAndCountry(allBooks);
+                    // Grup buku berdasarkan negara penerbit
+                    Map<String, List<CommercialBook>> groupedBooks = CommercialBook.groupBooksByPublisherCountry(allBooks);
 
                     // Menampilkan hasil
                     groupedBooks.forEach((key, value) -> {
-                        System.out.println("Penerbit dan Negara: " + key); // Menambahkan nama penerbit dan negara
-                        value.forEach(book -> System.out.println("- " + book));
+                        System.out.println(key); // Menambahkan nama penerbit dan negara
+                        value.forEach(book -> System.out.println("- " + book.getTitle())); // Sesuaikan dengan atribut yang sesuai
                         System.out.println(); // Baris kosong antar kelompok
                     });
                     break;
                 case 6:
                     // TODO: Implement searching for books based on Author country
-                    
                     Map<String, Map<String, List<CommercialBook>>> groupedBooks2 = repositoryBook.groupBooksByAuthorAndCountry();
 
                     // Lakukan sesuatu dengan hasil pengelompokan, misalnya tampilkan
@@ -77,9 +83,19 @@ public class Main {
                             books.forEach(book -> System.out.println("   - " + book.getTitle()));
                         });
                     });
+                                        
                     break;
                 case 7:
                     // TODO: Implement searching for the most expensive comic
+                    Optional<CommercialBook> highestPriceComic = CommercialBook.getComicWithHighestPrice(allBooks);
+
+                    if (highestPriceComic.isPresent()) {
+                        CommercialBook comic = highestPriceComic.get();
+                        System.out.println("Comic dengan price tertinggi: " + comic.getTitle() + ", price: " + comic.getPrice());
+                    } else {
+                        System.out.println("Tidak ada Comic yang ditemukan.");
+                    }
+
                     break;
                 case 0:
                     return; // Back to main menu
@@ -102,22 +118,67 @@ public class Main {
 
             int authorChoice = scanner.nextInt();
             scanner.nextLine(); // Consume newline
+            List<CommercialBook> allBooks = repositoryBook.getAllBook();
 
             switch (authorChoice) {
                 case 1:
                     // TODO: Implement searching for all Mangaka
+                    
+                    CommercialBook.displayAllMangaka(allBooks);
                     break;
                 case 2:
                     // TODO: Implement searching for all Authors
+                    // Mendapatkan data Author dari RepositoryBook
+                    List<Author> authors = repositoryBook.getAllBook().stream()
+                    .filter(book -> book instanceof Author)
+                    .map(book -> (Author) book)
+                    .collect(Collectors.toList());
+
+                    System.out.println(authors);
+                    // Menampilkan data Author
+                    for (int i = 0; i < authors.size(); i++) {
+                        Author author = authors.get(i);
+                        System.out.println("Nama Author: " + author.getFullName());
+                        System.out.println("Country: " + author.getCountry());
+                        System.out.println("Age: " + author.getAge());
+                        System.out.println();
+                    }
                     break;
                 case 3:
                     // TODO: Implement searching for all Novelis
+
+                    for (CommercialBook book : allBooks) {
+                        if (book instanceof Novelis) {
+                            Novelis novelist = (Novelis) book;
+                            System.out.println("Nama Novelis: " + novelist.getFullName());
+                            System.out.println("Country: " + novelist.getCountry());
+                            System.out.println("Age: " + novelist.getAge());
+
+                            // Memeriksa apakah kategori novelis sesuai dengan best seller
+                            boolean isBestSeller = "Best Seller".equals(novelist.getRating());
+                            System.out.println("Best Seller: " + isBestSeller);
+
+                            System.out.println("Rating: " + novelist.getRating());
+                            System.out.println();
+                        }
+                    }
                     break;
                 case 4:
                     // TODO: Implement searching for authors based on age range
+                    // Menampilkan data penulis berdasarkan rentang umur
+                    RepositoryBook.displayPeopleByAgeRange(allBooks);
                     break;
                 case 5:
                     // TODO: Implement searching for authors based on country
+                    // Grup author, novelis, dan mangaka berdasarkan negara
+                    Map<String, List<String>> groupedPeople = RepositoryBook.groupPeopleByCountry(allBooks);
+
+                    // Menampilkan hasil
+                    groupedPeople.forEach((key, value) -> {
+                        System.out.println(key);
+                        value.forEach(person -> System.out.println("- " + person));
+                        System.out.println(); // Baris kosong antar kelompok
+                    });
                     break;
                 case 0:
                     return; // Back to main menu
@@ -141,9 +202,30 @@ public class Main {
             switch (publisherChoice) {
                 case 1:
                     // TODO: Implement searching for the most expensive publisher
+                    // Menampilkan data publisher dengan product cost termahal
+                    Publisher mostExpensivePublisher = repositoryBook.getMostExpensivePublisher();
+                    System.out.println("Publisher dengan Product Cost Termahal:");
+                    if (mostExpensivePublisher != null) {
+                        System.out.println("Nama: " + mostExpensivePublisher.getPublisherName());
+                        System.out.println("Negara: " + mostExpensivePublisher.getCountry());
+                        System.out.println("Product Cost: " + mostExpensivePublisher.getProductionCost());
+                    } else {
+                        System.out.println("Tidak ada data.");
+                    }
                     break;
                 case 2:
                     // TODO: Implement searching for the cheapest publisher
+                    // Menampilkan data publisher dengan product cost termurah
+                    Publisher cheapestPublisher = repositoryBook.getCheapestPublisher();
+                    System.out.println("Publisher dengan Product Cost Termurah:");
+                    if (cheapestPublisher != null) {
+                        System.out.println("Nama: " + cheapestPublisher.getPublisherName());
+                        System.out.println("Negara: " + cheapestPublisher.getCountry());
+                        System.out.println("Product Cost: " + cheapestPublisher.getProductionCost());
+                    } else {
+                        System.out.println("Tidak ada data.");
+                    }
+                    System.out.println();
                     break;
                 case 0:
                     return; // Back to main menu
@@ -153,40 +235,11 @@ public class Main {
         }
     }
 
-    private static String getNovelCode(RepositoryBook repositoryBook) {
-        // Mendapatkan semua buku dari repositori
-        var allBooks = repositoryBook.getAllBook();
-
-        // Mencari novel pertama dalam daftar
-        for (CommercialBook book : allBooks) {
-            if (book instanceof Novel) {
-                // Jika buku merupakan novel, dapatkan kode buku dan kembalikan nilainya
-                return ((Novel) book).getBookCode();
-            }
-        }
-
-        // Mengembalikan string kosong jika tidak ada novel dalam daftar
-        return "";
-    }
-
-
     public static void main(String[] args) throws Exception {
         //code
         Scanner scanner = new Scanner(System.in);
         RepositoryBook repositoryBook = new RepositoryBook();
-
-        String novelCode = getNovelCode(repositoryBook);
-        System.out.println("Book Code of the first novel: " + novelCode);
-        
-        System.out.println("=============================");
-
-        List<CommercialBook> allBooks = repositoryBook.getAllBook();
-        //CommercialBook.displayBooksByCountryAndPublisher(allBooks, "United Kingdom", "Bloomsbury");
-        // CommercialBook.displayBooksByCountryAndPublisher(allBooks, "Indonesia", "Mizan");
-
-        // CommercialBook.displayComicByMangakaRating(allBooks);
-        // repositoryBook.displayComicByMangakaRating();
-
+        System.out.println("========================");
 
         while (true) {
             System.out.println("Main Menu");

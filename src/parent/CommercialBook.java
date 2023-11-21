@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import child.Author;
 import child.Comic;
 import child.EBook;
 import child.Mangaka;
@@ -14,6 +15,10 @@ import child.Novel;
 import child.Publisher;
 
 public class CommercialBook {
+    private String firstName;
+    private String lastName;
+    private String authorCountry;
+    private int authorAge;
     public double getPrice() {
         return 0;
     }
@@ -31,13 +36,24 @@ public class CommercialBook {
     }
     
     // Metode abstrak untuk mendapatkan nama penulis
-    public String getAuthorName() {
-        return "Unknown Author";
+    public String getFullName() {
+        return firstName + " " + lastName;
     }
 
     // Metode untuk mendapatkan negara penulis
     public String getAuthorCountry() {
-        return "Unknown Country";
+        return null;
+    }
+
+    // Getter untuk authorAge
+    public int getAuthorAge() {
+        return authorAge;
+    }
+
+    
+    public String getMangakaRating() {
+        // Ambil rating dari objek Mangaka (disesuaikan dengan struktur data)
+        return getMangaka().getRating();
     }
 
     // Metode statis untuk mendapatkan buku komersial dengan harga tertinggi
@@ -121,24 +137,19 @@ public class CommercialBook {
                 .collect(Collectors.toList());
     }
 
-    public static void displayBooksByCountryAndPublisher(List<CommercialBook> books, String country, String publisherName) {
-        // Filter buku berdasarkan negara dan nama penerbit
-        List<CommercialBook> filteredBooks = books.stream()
-                .filter(book -> book.getPublisher() != null &&
-                                book.getPublisher().getCountry().equalsIgnoreCase(country) &&
-                                book.getPublisher().getPublisherName().equalsIgnoreCase(publisherName))
-                .collect(Collectors.toList());
-    
-        // Tampilkan hasil
-        if (filteredBooks.isEmpty()) {
-            System.out.println("Tidak ada buku yang sesuai dengan kriteria.");
-        } else {
-            System.out.println("Daftar buku berdasarkan negara dan nama penerbit:");
-            System.out.println("Bloomsbury - United Kingdom");
-            for (CommercialBook book : filteredBooks) {
-                System.out.println("- " + book.getTitle());
+    public static Map<String, List<CommercialBook>> groupBooksByPublisherCountry(List<CommercialBook> books) {
+        Map<String, List<CommercialBook>> groupedBooks = new HashMap<>();
+
+        for (CommercialBook book : books) {
+            if (book.getPublisher() != null) {
+                Publisher publisher = book.getPublisher();
+                String key = publisher.getPublisherName() + " - " + publisher.getCountry();
+
+                groupedBooks.computeIfAbsent(key, k -> new ArrayList<>()).add(book);
             }
         }
+
+        return groupedBooks;
     }
 
     public static Map<String, List<CommercialBook>> groupBooksByPublisherAndCountry(List<CommercialBook> books) {
@@ -149,5 +160,44 @@ public class CommercialBook {
                 }));
     }
 
+    public Mangaka getMangaka() {
+        return null;
+    }
+    public static void displayByMangakaRating(List<CommercialBook> books) {
+        // Mengelompokkan Comic berdasarkan rating mangaka
+        Map<String, List<CommercialBook>> comicsByRating = books.stream()
+                .filter(book -> book instanceof Comic)
+                .collect(Collectors.groupingBy(book -> ((Comic) book).getMangakaRating()));
     
+        // Menampilkan data Comic berdasarkan rating mangaka
+        comicsByRating.forEach((rating, comics) -> {
+            System.out.println("Rating: " + rating);
+            comics.forEach(comic -> System.out.println("- " + comic.getTitle()));
+            System.out.println(); // Untuk memberikan jarak antar rating
+        });
+    }
+
+    // Metode statis untuk mendapatkan Comic dengan harga paling tinggi dari daftar buku
+    public static Optional<CommercialBook> getComicWithHighestPrice(List<CommercialBook> books) {
+        return books.stream()
+                .filter(book -> book instanceof Comic)
+                .max(Comparator.comparingDouble(CommercialBook::getPrice));
+    }
+
+     // Metode untuk menampilkan data semua Mangaka
+    public static void displayAllMangaka(List<CommercialBook> books) {
+        List<Mangaka> allMangaka = Mangaka.getAllMangaka(books);
+
+        if (!allMangaka.isEmpty()) {
+            System.out.println("Data semua Mangaka:");
+            allMangaka.forEach(mangaka -> {
+                System.out.print("\nNama: " + mangaka.getFullName());
+                System.out.print("\nCountry: " + mangaka.getCountry());
+                System.out.print("\nAge: " + mangaka.getAge());
+                System.out.print("\nRating: " + mangaka.getRating() +"\n\n");
+            });
+        } else {
+            System.out.println("Tidak ada data Mangaka yang ditemukan.");
+        }
+    }
 }

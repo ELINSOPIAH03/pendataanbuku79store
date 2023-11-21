@@ -1,5 +1,8 @@
 package child;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import parent.CommercialBook;
 
 public class Mangaka extends CommercialBook{
@@ -65,13 +68,27 @@ public class Mangaka extends CommercialBook{
         this.rating = rating;
     }
 
-    // Method untuk mendapatkan nama lengkap
-    public String getFullName() {
-        return firstName + " " + lastName;
+    public String getCombinedRating() {
+        return getRating();
+    }
+
+    // Metode untuk mendapatkan semua Mangaka dari daftar buku
+    public static List<Mangaka> getAllMangaka(List<CommercialBook> books) {
+        return books.stream()
+                .filter(book -> book.getMangaka() != null)
+                .map(CommercialBook::getMangaka)
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     @Override
     public String toString() {
         return "Mangaka: " + getFullName() + ", Country: " + country + ", Age: " + age + ", Rating: " + rating;
+    }
+
+    @Override
+    // Method untuk mendapatkan nama lengkap
+    public String getFullName() {
+        return firstName + " " + lastName;
     }
 }

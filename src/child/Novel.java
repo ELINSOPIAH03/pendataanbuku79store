@@ -1,5 +1,7 @@
 package child;
 
+import java.util.List;
+
 import parent.CommercialBook;
 
 public class Novel extends CommercialBook{
@@ -83,8 +85,6 @@ public class Novel extends CommercialBook{
         }
     }
 
-    
-
     @Override
     public String toString() {
         return "Novel: " + title + ", Author: " + author.getFullName() +
@@ -102,7 +102,7 @@ public class Novel extends CommercialBook{
     }
 
     @Override
-    public String getAuthorName() {
+    public String getFullName() {
         return author.getFullName();
     }
 

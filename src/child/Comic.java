@@ -1,5 +1,7 @@
 package child;
 
+import java.util.List;
+
 import parent.CommercialBook;
 
 public class Comic extends CommercialBook {
@@ -73,10 +75,6 @@ public class Comic extends CommercialBook {
         this.tax = tax;
     }
 
-    public Mangaka getMangaka() {
-        return mangaka;
-    }
-
     // Method untuk menghitung harga dan pajak
     public void calculatePrice() {
         double productionCost = publisher.getProductionCost();
@@ -106,6 +104,10 @@ public class Comic extends CommercialBook {
         this.tax = 0.05 * this.price;
     }
 
+    public static void displayByMangakaRating(List<CommercialBook> books) {
+        CommercialBook.displayByMangakaRating(books);
+    }
+
     @Override
     public String toString() {
         return "Comic: " + title + ", Author: " + author.getFullName() +
@@ -123,7 +125,7 @@ public class Comic extends CommercialBook {
     }
 
     @Override
-    public String getAuthorName() {
+    public String getFullName() {
         return author.getFullName();
     }
 
@@ -132,5 +134,13 @@ public class Comic extends CommercialBook {
         return author.getCountry();
     }
     
+    @Override
+    public Mangaka getMangaka() {
+        return author;
+    }
 
+    @Override
+    public String getMangakaRating() {
+        return author.getRating();
+    }
 }
